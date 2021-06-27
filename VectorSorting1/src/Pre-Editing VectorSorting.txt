@@ -1,0 +1,243 @@
+//============================================================================
+// Name        : VectorSorting.cpp
+// Author      : Bryan Gora
+// Version     : 1.0
+// Copyright   : Copyright © 2017 SNHU COCE
+// Description : Vector Sorting Algorithms
+//============================================================================
+
+#include <algorithm>
+#include <iostream>
+#include <time.h>
+
+#include "CSVparser.hpp"
+
+using namespace std;
+
+//============================================================================
+// Global definitions visible to all methods and classes
+//============================================================================
+
+double strToDouble(string str, char ch);
+
+struct Bid {
+    string bidId; // unique identifier
+    string title;
+    string fund;
+    double amount;
+    Bid() {
+        amount = 0.0;
+    }
+};
+
+//============================================================================
+// Static methods used for testing
+//============================================================================
+
+
+void displayBid(Bid bid) {
+    cout << bid.bidId << ": " << bid.title << " | " << bid.amount << " | "
+            << bid.fund << endl;
+    return;
+}
+
+Bid getBid() {
+    Bid bid;
+
+    cout << "Enter Id: ";
+    cin.ignore();
+    getline(cin, bid.bidId);
+
+    cout << "Enter title: ";
+    getline(cin, bid.title);
+
+    cout << "Enter fund: ";
+    cin >> bid.fund;
+
+    cout << "Enter amount: ";
+    cin.ignore();
+    string strAmount;
+    getline(cin, strAmount);
+    bid.amount = strToDouble(strAmount, '$');
+
+    return bid;
+}
+
+vector<Bid> loadBids(string csvPath) {
+    cout << "Loading CSV file " << csvPath << endl;
+
+
+try {
+        
+        for (unsigned int i = 0; i < file.rowCount(); i++) {
+
+            
+
+            Bid bid;
+            bid.bidId = file[i][1];
+            bid.title = file[i][0];
+            bid.fund = file[i][8];
+            bid.amount = strToDouble(file[i][4], '$');
+
+      
+            bids.push_back(bid);
+        }
+    } catch (csv::Error &e) {
+        std::cerr << e.what() << std::endl;
+    }
+    return bids;
+}
+
+                       // quick sort logic over bid.title
+
+
+int partition(vector<Bid>& bids, int begin, int end) {
+int l=begin;
+int h = end;
+
+int pivot=(begin+(end-begin)/2);
+bool finished=false;
+    
+
+
+                      // continuous loop low point when its below pivot
+while(!finished){
+	while(bids[l].title.compare(bids[pivot].title)<0){
+		++l;
+	}
+	while(bids[pivot].title.compare(bids[h].title)<0){
+		--h;
+	}
+	if (l>=h){
+		finished=true;
+	}else{
+		swap(bids[l],bids[h]);
+		++l;
+		--h;
+	}
+}
+return h;
+}
+
+
+
+void quickSort(vector<Bid>& bids, int begin, int end) {
+unsigned int middle = 0;
+if(begin>=end){
+	return;
+    
+
+middle=partition(bids,begin,end);
+quickSort(bids,begin,middle);
+quickSort(bids,middle+1,end);
+                          
+}
+void selectionSort(vector<Bid>& bids) {
+	unsigned int smallest;
+	unsigned int largest=bids.size();
+	for(unsigned place=0;place<largest;++place){
+		smallest=place;
+
+		for (unsigned j=place+1;j<largest;++j){
+			if(bids[j].title.compare(bids[smallest].title)<0){
+				smallest=j;
+			}
+		}
+		if(smallest!=place)
+			swap(bids[place],bids[smallest]);
+
+	}
+
+}
+
+double strToDouble(string str, char ch) {
+    str.erase(remove(str.begin(), str.end(), ch), str.end());
+    return atof(str.c_str());
+}
+
+int main(int argc, char* argv[]) {
+
+    string csvPath;
+    switch (argc) {
+    case 2:
+        csvPath = argv[1];
+        break;
+    default:
+        csvPath = "eBid_Monthly_Sales_Dec_2016.csv";
+    }
+
+    vector<Bid> bids;
+
+    clock_t ticks;
+
+    int choice = 0;
+    while (choice != 9) {
+        cout << "Menu:" << endl;
+        cout << "  1. Load Bids" << endl;
+        cout << "  2. Display All Bids" << endl;
+        cout << "  3. Selection Sort All Bids" << endl;
+        cout << "  4. Quick Sort All Bids" << endl;
+        cout << "  9. Exit" << endl;
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+
+        case 1:
+            // Initialize a timer variable before loading bids
+            ticks = clock();
+
+            // Complete the method call to load the bids
+            bids = loadBids(csvPath);
+
+            cout << bids.size() << " bids read" << endl;
+
+            // Calculate elapsed time and display result
+            ticks = clock() - ticks; // current clock ticks minus starting clock ticks
+            cout << "time: " << ticks << " clock ticks" << endl;
+            cout << "time: " << ticks * 1.0 / CLOCKS_PER_SEC << " seconds" << endl;
+
+            break;
+
+        case 2:
+            // Loop and display the bids read
+            for (unsigned int i = 0; i < bids.size(); ++i) {
+                displayBid(bids[i]);
+            }
+            cout << endl;
+
+            break;
+
+        // Invoke the selection sort and report timing results
+
+        case 3:
+            ticks=clock();
+            selectionSort(bids);
+            
+                 cout<<bids.size()<<"bids read"<<endl;
+            
+            ticks=clock()-ticks;
+            cout<<"time:"<< ticks<<"clock ticks"<<endl;
+            cout<<"time:"<<ticks*1.0/CLOCKS_PER_SEC<<"seconds"<<endl;
+             
+            break;
+
+        // Invoke the quick sort and report timing results
+
+        case 4:
+        	ticks=clock();
+
+        	quickSort(bids, 0, bids.size()-1);
+        	cout<< bids.size()<<"bids read"<< endl;
+        	ticks=clock()-ticks;
+        	cout<<"time"<<ticks<<"clock ticks"<<endl;
+        	cout<<"time"<<ticks*1.0/CLOCKS_PER_SEC<<"seconds"<<endl;
+
+        	break;
+        }
+    }
+
+    cout << "Good bye." << endl;
+
+    return 0;
+}
