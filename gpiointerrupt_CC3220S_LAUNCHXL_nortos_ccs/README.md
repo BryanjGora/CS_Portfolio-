@@ -1,6 +1,6 @@
-## Example Summary
 
-Application that toggles an LED(s) using a GPIO pin interrupt.
+
+Application that Serves as a thermostat
 
 ## Peripherals & Pin Assignments
 
